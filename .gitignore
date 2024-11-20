@@ -1,0 +1,6 @@
+# binaries
+main
+
+# cryptographic keys
+private_key.pem
+public_key.pem
