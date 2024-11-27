@@ -54,6 +54,7 @@ func main() {
 		fmt.Printf("Could not create hash: %s\n", err.Error())
 		return
 	}
+	fmt.Println("Image hash: ", imageHash)
 
 	privateKey, err := LoadPrivateKey(PRIVATE_KEY_FILE_NAME)
 	if err != nil {

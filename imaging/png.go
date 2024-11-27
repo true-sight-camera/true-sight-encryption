@@ -183,7 +183,7 @@ func (p *PngInteractor) ReadAllMetadata() error {
 		// Identify metadata chunks
 		chunkTypeStr := string(chunkType)
 		if chunkTypeStr == "tEXt" || chunkTypeStr == "zTXt" || chunkTypeStr == "iTXt" {
-			fmt.Printf("Found %s chunk:\n", chunkTypeStr)
+			fmt.Printf("%s chunk: ", chunkTypeStr)
 			fmt.Printf("Metadata: %s\n", chunkData)
 		}
 
