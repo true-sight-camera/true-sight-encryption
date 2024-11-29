@@ -1,11 +1,7 @@
-import os
-import time
 import hashlib
-import uuid
-from dataclasses import dataclass
-from typing import Tuple, Optional
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key
 from binascii import hexlify, unhexlify
 from imaging.png import PngInteractor
@@ -19,9 +15,10 @@ PUBLIC_KEY_FILE_NAME = "public_key.pem"
 def load_private_key(file_path: str) -> rsa.RSAPrivateKey:
     """Load an RSA private key from a PEM file."""
     try:
-        with open(file_path, 'rb') as key_file:
+        with open(file_path, 'r') as key_file:
             pem_data = key_file.read()
-            private_key = load_pem_private_key(pem_data, password=None)
+            private_key_bytes = pem_data.encode("utf-8")
+            private_key: rsa.RSAPrivateKey = load_pem_private_key(private_key_bytes, None)
             if not isinstance(private_key, rsa.RSAPrivateKey):
                 raise ValueError("Not an RSA private key")
             return private_key
@@ -46,7 +43,7 @@ def sign_message(private_key: rsa.RSAPrivateKey, message: bytes) -> bytes:
         signature = private_key.sign(
             message,
             padding.PKCS1v15(),
-            hashes.SHA256()
+            Prehashed(hashes.SHA256())
         )
         return signature
     except Exception as e:
@@ -59,7 +56,7 @@ def verify_signature(public_key: rsa.RSAPublicKey, message: bytes, signature: by
             signature,
             message,
             padding.PKCS1v15(),
-            hashes.SHA256()
+            Prehashed(hashes.SHA256())
         )
         return True
     except Exception as e:
