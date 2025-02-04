@@ -17,14 +17,14 @@ class PngInteractor:
         Image.open(self.filename).verify()
 
         # Read original file
-        with open(self.filename, 'rb') as f:
-            data = f.read()
+        # with open(self.filename, 'rb') as f:
+        #     data = f.read()
 
         # Create buffer for new file
         buffer = bytearray()
 
         # Write original content up to IEND chunk
-        buffer.extend(data[:-12])  # Skip IEND chunk
+        buffer.extend(self.image_bytes[:-12])  # Skip IEND chunk
 
         # Create tEXt chunk
         key_value = f"{key}\0{value}".encode('latin-1')
@@ -44,7 +44,7 @@ class PngInteractor:
         buffer.extend(struct.pack('>I', crc))
 
         # Write original IEND chunk
-        buffer.extend(data[-12:])
+        buffer.extend(self.image_bytes[-12:])
 
         # Write to output file
         with open(output_filename, 'wb') as f:
@@ -79,11 +79,13 @@ class PngInteractor:
         # Write original IEND chunk
         buffer.extend(self.image_bytes[-12:])
 
+        self.image_bytes = buffer
+
         # Write to output file
         with open(output_filename, 'wb') as f:
             f.write(buffer)
 
-        print(f"Metadata added and image saved as {output_filename}")
+        print(f"Metadata added and image saved as {output_filename}: {key_value}")
 
     def read_all_metadata(self) -> None:
         """Read and print all metadata chunks from the PNG file."""
@@ -153,7 +155,6 @@ class PngInteractor:
 
                 except struct.error:
                     break
-
         return None
 
     def flatten_image(self) -> Tuple[bytes, Tuple[int, int]]:

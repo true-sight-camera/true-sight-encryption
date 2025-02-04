@@ -9,8 +9,8 @@ from imaging.png import PngInteractor
 # Constants
 IMAGE_FILE_NAME = "data/image2.png"
 OUTPUT_FILE_NAME = "outputs/test1.png"
-PRIVATE_KEY_FILE_NAME = "private_key.pem"
-PUBLIC_KEY_FILE_NAME = "public_key.pem"
+PRIVATE_KEY_FILE_NAME = "capstone"
+PUBLIC_KEY_FILE_NAME = "capstone.pub"
 
 def load_private_key(file_path: str) -> rsa.RSAPrivateKey:
     """Load an RSA private key from a PEM file."""
@@ -37,26 +37,26 @@ def load_public_key(file_path: str) -> rsa.RSAPublicKey:
     except Exception as e:
         raise Exception(f"Error reading public key file: {str(e)}")
 
-def sign_message(private_key: rsa.RSAPrivateKey, message: bytes) -> bytes:
+def sign_message(private_key: rsa.RSAPrivateKey, message: bytes, prehashed = True) -> bytes:
     """Sign a message using the private key."""
     try:
         signature = private_key.sign(
             message,
             padding.PKCS1v15(),
-            Prehashed(hashes.SHA256())
+            Prehashed(hashes.SHA256()) if prehashed else hashes.SHA256()
         )
         return signature
     except Exception as e:
         raise Exception(f"Error signing message: {str(e)}")
 
-def verify_signature(public_key: rsa.RSAPublicKey, message: bytes, signature: bytes) -> bool:
+def verify_signature(public_key: rsa.RSAPublicKey, message: bytes, signature: bytes, prehashed = True) -> bool:
     """Verify a signature using the public key."""
     try:
         public_key.verify(
             signature,
             message,
             padding.PKCS1v15(),
-            Prehashed(hashes.SHA256())
+            Prehashed(hashes.SHA256()) if prehashed else hashes.SHA256()
         )
         return True
     except Exception as e:
@@ -74,6 +74,10 @@ def main():
         # Create PNG interactor for the input image
         png_creation_interactor = PngInteractor(IMAGE_FILE_NAME)
 
+        username = "nrazee"
+        png_creation_interactor.add_text_chunk_to_data("Username", username, OUTPUT_FILE_NAME)
+        print("Username added to metadata")
+
         # Flatten the image and get its bytes
         image_bytes, _ = png_creation_interactor.flatten_image()
         
@@ -86,6 +90,7 @@ def main():
         print(f"Image hash (bytes): {image_hash}")
         print(f"Image hash (hex): {hexlify(image_hash).decode()}")
         print(f"Image hash (bytes array): {list(image_hash)}")
+
 
         # Load private key and sign the hash
         private_key = load_private_key(PRIVATE_KEY_FILE_NAME)
@@ -100,6 +105,8 @@ def main():
             OUTPUT_FILE_NAME
         )
         print("Signature added to file metadata")
+
+
         print("\n-----------READING METADATA-----------\n")
 
         
@@ -125,6 +132,20 @@ def main():
             print("\nSignature Verified ✓")
         else:
             print("\nSignature Verification Failed ✗")
+
+
+        username_bytes = bytes(username, encoding="ascii")
+
+        username_signature = sign_message(private_key,username_bytes, False)
+
+        print("\nUsername: ", username)
+        print("Username signature (put in request): ", hexlify(username_signature).decode())
+
+        if verify_signature(public_key, username_bytes, username_signature, False):
+            print("Username verified")
+        else:
+            print("Username not verified")
+
 
     except Exception as e:
         print(f"Error: {str(e)}")
