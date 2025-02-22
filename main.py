@@ -91,11 +91,38 @@ def main():
         print(f"Image hash (hex): {hexlify(image_hash).decode()}")
         print(f"Image hash (bytes array): {list(image_hash)}")
 
+        # message = "capstone"
+        # print('practice hash ',hexlify(hash_image_sha256(message.encode('utf-8'))).decode())
+
 
         # Load private key and sign the hash
         private_key = load_private_key(PRIVATE_KEY_FILE_NAME)
         signed_bytes = sign_message(private_key, image_hash)  # Pass bytes directly
         print(f"SIGNED MESSAGE: {hexlify(signed_bytes).decode()}\n")
+
+        # compare trimmed png from frontend here
+
+        trimmed_png = PngInteractor('trimmedPNG.png')
+
+        if trimmed_png.image_bytes != png_creation_interactor.image_bytes:
+            print(hexlify(trimmed_png.image_bytes[:20]).decode())
+            print(hexlify(trimmed_png.image_bytes[-20:]).decode())
+            print("original",hexlify(png_creation_interactor.image_bytes[:20]).decode())
+            print(hexlify(png_creation_interactor.image_bytes[-20:]).decode())
+            raise Exception("trimmed image doesn't match pre signature")
+        else:
+            flattened_bytes, _ = trimmed_png.flatten_image()
+            print(hexlify(hash_image_sha256(flattened_bytes)).decode())
+            print(len(trimmed_png.image_bytes))
+            print(len(png_creation_interactor.image_bytes))
+
+        print("trimmed images match")
+
+        # print("")
+
+        # print(hexlify(png_creation_interactor.image_bytes).decode())
+
+        # print("")
 
 
         # Add signature to image metadata

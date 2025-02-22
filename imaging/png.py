@@ -171,6 +171,21 @@ class PngInteractor:
             
             return flattened, rgba_img.size
 
+    def compare_images(self, path) -> bool:
+
+        with open(path, "rb") as second_img:
+            second_image_bytes = second_img.read()
+
+            print(second_image_bytes[:10])
+            print(second_image_bytes[-10:])
+            
+
+            if second_image_bytes != self.image_bytes:
+                return False
+        
+        return True
+
+
 def create_square_image(side_length: int, output_filename: str) -> None:
     """Create a square image with a specific (arbitrary rn) pattern."""
     # Create new image with RGBA mode
