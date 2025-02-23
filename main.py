@@ -77,16 +77,18 @@ def main():
         username = "nrazee"
         png_creation_interactor.add_text_chunk_to_data("Username", username, OUTPUT_FILE_NAME)
         print("Username added to metadata")
-
+        
+        '''
         # Flatten the image and get its bytes
         image_bytes, _ = png_creation_interactor.flatten_image()
         
         # Ensure image_bytes is bytes, not a buffer
         if not isinstance(image_bytes, bytes):
             image_bytes = bytes(image_bytes)
+        ''' 
 
         # Hash the image
-        image_hash = hash_image_sha256(image_bytes)
+        image_hash = hash_image_sha256(png_creation_interactor.image_bytes)
         print(f"Image hash (bytes): {image_hash}")
         print(f"Image hash (hex): {hexlify(image_hash).decode()}")
         print(f"Image hash (bytes array): {list(image_hash)}")
