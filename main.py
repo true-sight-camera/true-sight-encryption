@@ -1,3 +1,6 @@
+import sys
+print("Python executable:", sys.executable)
+print("Python paths:", sys.path)
 import hashlib
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -5,6 +8,7 @@ from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key
 from binascii import hexlify, unhexlify
 from imaging.png import PngInteractor
+from crypto.homomorphic import compute_hash, sign_image
 
 # Constants
 IMAGE_FILE_NAME = "data/image2.png"
@@ -72,10 +76,11 @@ def hash_image_sha256(data: bytes) -> bytes:
 def main():
     try:
         # Create PNG interactor for the input image
-        png_creation_interactor = PngInteractor(IMAGE_FILE_NAME)
+        png_interactor = PngInteractor(IMAGE_FILE_NAME)
 
-        # Flatten the image and get its bytes
-        image_bytes, _ = png_creation_interactor.flatten_image()
+        # Flatten the image and get its bytes as if it were a vector
+        image_bytes, _ = png_interactor.flatten_image()
+        image_matrix = png_interactor.matrix_image()
         
         # Ensure image_bytes is bytes, not a buffer
         if not isinstance(image_bytes, bytes):
@@ -92,9 +97,17 @@ def main():
         signed_bytes = sign_message(private_key, image_hash)  # Pass bytes directly
         print(f"SIGNED MESSAGE: {hexlify(signed_bytes).decode()}\n")
 
+        # TEST HOMOMORPHIC
+        print("TEST HOMOMORPHIC")
+        print(len(image_matrix))
+        print(len(image_matrix[0]))
+        signed_hash, image_hash = sign_image(image_matrix, private_key)
+        print("Image Hash:", image_hash.hex())
+        print("Signed Hash:", signed_hash.hex())
+        print("TEST HOMOMORPHIC END")
 
         # Add signature to image metadata
-        png_creation_interactor.add_text_chunk_to_data(
+        png_interactor.add_text_chunk_to_data(
             "Signature", 
             hexlify(signed_bytes).decode(), 
             OUTPUT_FILE_NAME

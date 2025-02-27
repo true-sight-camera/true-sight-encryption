@@ -4,3 +4,8 @@ main
 # cryptographic keys
 private_key.pem
 public_key.pem
+
+bin
+lib
+__pycache__
+pyvenv.cfg

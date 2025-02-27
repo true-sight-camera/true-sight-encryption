@@ -1,6 +1,6 @@
 import struct
 import zlib
-from typing import Tuple, Optional
+from typing import List, Optional, Tuple
 from PIL import Image
 import numpy as np
 
@@ -169,6 +169,21 @@ class PngInteractor:
             flattened = pixel_data.tobytes()
             
             return flattened, rgba_img.size
+        
+    def matrix_image(self) -> List[List[int]]:
+        """Create matrix of raw RGBA bytes."""
+        with Image.open(self.filename) as img:
+            rgba_img = img.convert('RGBA')
+            
+            # Convert to numpy array for faster processing
+            pixel_data = np.array(rgba_img)
+            
+            # Create matrix from numpy array
+            matrix = pixel_data.tolist()
+            
+            return matrix
+
+
 
 def create_square_image(side_length: int, output_filename: str) -> None:
     """Create a square image with a specific (arbitrary rn) pattern."""
